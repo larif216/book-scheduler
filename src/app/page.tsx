@@ -9,6 +9,7 @@ type Book = {
   Title: string;
   Authors: string[];
   EditionNumber: string;
+  IsAvailable: boolean;
 };
 
 export default function Home() {
@@ -18,8 +19,10 @@ export default function Home() {
   const [currentEdition, setCurrentEdition] = useState<string | null>(null);
   const [subject, setSubject] = useState<string>('');
   const [searchTriggered, setSearchTriggered] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
 
   const fetchBooks = async (subject: string) => {
+    setLoading(true);
     try {
       const response = await fetch(`http://localhost:8080/api/books?subject=${subject}`);
       if (!response.ok) throw new Error('Failed to fetch books');
@@ -27,11 +30,13 @@ export default function Home() {
       setBooks(data);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    Modal.setAppElement('#root'); // Set app root for accessibility
+    Modal.setAppElement('#root');
     if (searchTriggered) {
       fetchBooks(subject);
       setSearchTriggered(false);
@@ -63,6 +68,9 @@ export default function Home() {
       if (!response.ok) throw new Error('Failed to schedule pickup');
       const data = await response.json();
       alert(data.Message);
+
+      await fetchBooks(subject);
+
       setIsModalOpen(false);
     } catch (error) {
       console.error(error);
@@ -104,9 +112,14 @@ export default function Home() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-        {books.filter(book => book.EditionNumber).length > 0 ? (
-          books.filter(book => book.EditionNumber).map((book, index) => (
+      {loading ? (
+        <div className="flex justify-center items-center mt-8">
+          <div className="loader"></div>
+          <p className="text-lg text-gray-600 ml-4">Loading books...</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
+          {books.filter((book) => book.EditionNumber).map((book, index) => (
             <div
               key={index}
               className="p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow"
@@ -118,22 +131,23 @@ export default function Home() {
               <p className="text-sm text-gray-600">
                 <strong>Edition Number:</strong> {book.EditionNumber}
               </p>
-              <div className="mt-6">
-                <button
-                  className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition duration-200"
-                  onClick={() => handleBorrow(book.EditionNumber)}
-                >
-                  Borrow
-                </button>
-              </div>
+              <p className="text-sm text-gray-600">
+                <strong>Available:</strong> {book.IsAvailable ? 'Yes' : 'No'}
+              </p>
+              {book.IsAvailable && (
+                <div className="mt-6">
+                  <button
+                    className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition duration-200"
+                    onClick={() => handleBorrow(book.EditionNumber)}
+                  >
+                    Borrow
+                  </button>
+                </div>
+              )}
             </div>
-          ))
-        ) : (
-          <div className="col-span-full flex justify-center items-center">
-            <p className="text-center text-lg text-gray-600">No books with the subject found.</p>
-          </div>
-        )}
-      </div>
+          ))}
+        </div>
+      )}
 
       <Modal
         isOpen={isModalOpen}
@@ -172,3 +186,4 @@ export default function Home() {
     </div>
   );
 }
+
