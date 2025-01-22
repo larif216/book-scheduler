@@ -19,7 +19,6 @@ export default function Home() {
   const [subject, setSubject] = useState<string>('');
   const [searchTriggered, setSearchTriggered] = useState<boolean>(false);
 
-  // Fetch books by subject
   const fetchBooks = async (subject: string) => {
     try {
       const response = await fetch(`http://localhost:8080/api/books?subject=${subject}`);
@@ -31,21 +30,19 @@ export default function Home() {
     }
   };
 
-  // Trigger search when subject changes
   useEffect(() => {
+    Modal.setAppElement('#root'); // Set app root for accessibility
     if (searchTriggered) {
       fetchBooks(subject);
       setSearchTriggered(false);
     }
   }, [searchTriggered, subject]);
 
-  // Open modal to borrow book
   const handleBorrow = (editionNumber: string) => {
     setCurrentEdition(editionNumber);
     setIsModalOpen(true);
   };
 
-  // Handle the schedule form submission
   const handleScheduleSubmit = async () => {
     if (!selectedDateTime) {
       alert('Please select a date and time for pickup!');
@@ -73,12 +70,10 @@ export default function Home() {
     }
   };
 
-  // Trigger search function
   const handleSearch = () => {
     setSearchTriggered(true);
   };
 
-  // Handle key press for search
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -86,10 +81,9 @@ export default function Home() {
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Book List</h1>
+    <div className="container mx-auto p-8 bg-gray-50 min-h-screen">
+      <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">Book List</h1>
 
-      {/* Search bar */}
       <div className="mb-6 text-center">
         <input
           type="text"
@@ -97,41 +91,36 @@ export default function Home() {
           value={subject}
           onKeyDown={handleKeyDown}
           onChange={(e) => setSubject(e.target.value)}
-          className="w-full sm:w-1/2 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full sm:w-80 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
-      {/* Search button */}
       <div className="text-center">
         <button
           onClick={handleSearch}
-          className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200"
         >
           Search
         </button>
       </div>
 
-      {/* Book List */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {books.filter(book => book.EditionNumber).length > 0 ? (
           books.filter(book => book.EditionNumber).map((book, index) => (
             <div
               key={index}
-              className="p-4 border rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow"
             >
-              <h2 className="text-lg font-semibold">{book.Title}</h2>
+              <h2 className="text-xl font-semibold text-gray-800 mb-2">{book.Title}</h2>
               <p className="text-sm text-gray-600">
-                <strong>Authors:</strong>{' '}
-                {book.Authors.length > 0 ? book.Authors.join(', ') : 'Unknown Author'}
+                <strong>Authors:</strong> {book.Authors.length > 0 ? book.Authors.join(', ') : 'Unknown Author'}
               </p>
-              {book.EditionNumber && (
-                <p className="text-sm text-gray-600">
-                  <strong>Edition Number:</strong> {book.EditionNumber}
-                </p>
-              )}
-              <div className="mt-4 flex flex-col items-start space-y-4">
+              <p className="text-sm text-gray-600">
+                <strong>Edition Number:</strong> {book.EditionNumber}
+              </p>
+              <div className="mt-6">
                 <button
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition"
+                  className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition duration-200"
                   onClick={() => handleBorrow(book.EditionNumber)}
                 >
                   Borrow
@@ -141,41 +130,39 @@ export default function Home() {
           ))
         ) : (
           <div className="col-span-full flex justify-center items-center">
-            <p className="text-center text-lg">No books with an edition number found.</p>
+            <p className="text-center text-lg text-gray-600">No books with the subject found.</p>
           </div>
         )}
       </div>
 
-      {/* Modal for schedule pickup */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
-        className="fixed inset-0 flex justify-center items-center z-50 bg-black bg-opacity-50"
+        className="fixed inset-0 flex justify-center items-center z-50"
         overlayClassName="fixed inset-0 bg-black bg-opacity-50"
         contentLabel="Select Pickup DateTime"
       >
-        <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-          <h2 className="text-xl font-semibold mb-4">Select Pickup Date and Time</h2>
+        <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+          <h2 className="text-xl font-semibold text-gray-800 mb-6">Select Pickup Date and Time</h2>
           <DatePicker
             selected={selectedDateTime}
-            onChange={(date: Date | null) => setSelectedDateTime(date)} // Allow null as the date value
+            onChange={(date: Date | null) => setSelectedDateTime(date)}
             showTimeSelect
             timeIntervals={15}
             dateFormat="Pp"
-            className="w-full p-2 border rounded-lg mb-4"
+            className="w-full p-3 border border-gray-300 rounded-lg mb-6"
           />
 
-          {/* Action buttons */}
           <div className="flex justify-end space-x-4">
             <button
               onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+              className="px-5 py-3 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition duration-200"
             >
               Cancel
             </button>
             <button
               onClick={handleScheduleSubmit}
-              className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
+              className="px-5 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
             >
               Submit Schedule
             </button>

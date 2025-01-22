@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <h1 className="text-lg font-bold">Library App</h1>
           </div>
         </header>
-        <main className="container mx-auto mt-6">{children}</main>
+        <main id='root' className="container mx-auto mt-6">{children}</main>
       </body>
     </html>
   );
