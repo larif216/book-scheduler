@@ -16,9 +16,10 @@ export default function Home() {
   const [selectedDateTime, setSelectedDateTime] = useState<Date | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentEdition, setCurrentEdition] = useState<string | null>(null);
-  const [subject, setSubject] = useState<string>('puzzle');
+  const [subject, setSubject] = useState<string>('');
   const [searchTriggered, setSearchTriggered] = useState<boolean>(false);
 
+  // Fetch books by subject
   const fetchBooks = async (subject: string) => {
     try {
       const response = await fetch(`http://localhost:8080/api/books?subject=${subject}`);
@@ -30,6 +31,7 @@ export default function Home() {
     }
   };
 
+  // Trigger search when subject changes
   useEffect(() => {
     if (searchTriggered) {
       fetchBooks(subject);
@@ -37,11 +39,13 @@ export default function Home() {
     }
   }, [searchTriggered, subject]);
 
+  // Open modal to borrow book
   const handleBorrow = (editionNumber: string) => {
     setCurrentEdition(editionNumber);
     setIsModalOpen(true);
   };
 
+  // Handle the schedule form submission
   const handleScheduleSubmit = async () => {
     if (!selectedDateTime) {
       alert('Please select a date and time for pickup!');
@@ -69,10 +73,12 @@ export default function Home() {
     }
   };
 
+  // Trigger search function
   const handleSearch = () => {
     setSearchTriggered(true);
   };
 
+  // Handle key press for search
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       handleSearch();
@@ -81,8 +87,9 @@ export default function Home() {
 
   return (
     <div className="container mx-auto p-6">
-      <h1 className="text-2xl font-bold mb-6 text-center">Book List</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Book List</h1>
 
+      {/* Search bar */}
       <div className="mb-6 text-center">
         <input
           type="text"
@@ -90,18 +97,21 @@ export default function Home() {
           value={subject}
           onKeyDown={handleKeyDown}
           onChange={(e) => setSubject(e.target.value)}
+          className="w-full sm:w-1/2 p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
+      {/* Search button */}
       <div className="text-center">
         <button
           onClick={handleSearch}
-          className="ml-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+          className="ml-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition"
         >
           Search
         </button>
       </div>
 
+      {/* Book List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
         {books.length > 0 ? (
           books.map((book, index) => (
@@ -130,10 +140,14 @@ export default function Home() {
             </div>
           ))
         ) : (
-          <p className="text-center text-lg">No books found for the selected subject.</p>
+          <div className="col-span-full flex justify-center items-center">
+            <p className="text-center text-lg">No books found for the selected subject.</p>
+          </div>
         )}
       </div>
 
+
+      {/* Modal for schedule pickup */}
       <Modal
         isOpen={isModalOpen}
         onRequestClose={() => setIsModalOpen(false)}
@@ -152,6 +166,7 @@ export default function Home() {
             className="w-full p-2 border rounded-lg mb-4"
           />
 
+          {/* Action buttons */}
           <div className="flex justify-end space-x-4">
             <button
               onClick={() => setIsModalOpen(false)}
