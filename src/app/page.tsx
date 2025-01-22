@@ -113,8 +113,8 @@ export default function Home() {
 
       {/* Book List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-6">
-        {books.length > 0 ? (
-          books.map((book, index) => (
+        {books.filter(book => book.EditionNumber).length > 0 ? (
+          books.filter(book => book.EditionNumber).map((book, index) => (
             <div
               key={index}
               className="p-4 border rounded-lg shadow-md hover:shadow-lg transition-shadow"
@@ -141,11 +141,10 @@ export default function Home() {
           ))
         ) : (
           <div className="col-span-full flex justify-center items-center">
-            <p className="text-center text-lg">No books found for the selected subject.</p>
+            <p className="text-center text-lg">No books with an edition number found.</p>
           </div>
         )}
       </div>
-
 
       {/* Modal for schedule pickup */}
       <Modal
