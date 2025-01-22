@@ -29,7 +29,7 @@ export default function Home() {
       const data = await response.json();
       setBooks(data);
     } catch (error) {
-      console.error(error);
+      alert('An error occurred while fetching the books: ' + error.message);
     } finally {
       setLoading(false);
     }
@@ -53,9 +53,9 @@ export default function Home() {
       alert('Please select a date and time for pickup!');
       return;
     }
-
+  
     const scheduleDateTime = selectedDateTime.toISOString();
-
+  
     try {
       const response = await fetch('http://localhost:8080/api/pickup-schedule/create', {
         method: 'POST',
@@ -64,17 +64,16 @@ export default function Home() {
           datetime: scheduleDateTime,
         }),
       });
-
+  
       if (!response.ok) throw new Error('Failed to schedule pickup');
       const data = await response.json();
       alert(data.Message);
-
+  
       await fetchBooks(subject);
-
+  
       setIsModalOpen(false);
     } catch (error) {
-      console.error(error);
-      alert('An error occurred while scheduling the pickup.');
+      alert('An error occurred while scheduling the pickup: ' + error.message);
     }
   };
 
@@ -119,35 +118,42 @@ export default function Home() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
-          {books.filter((book) => book.EditionNumber).map((book, index) => (
-            <div
-              key={index}
-              className="p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow"
-            >
-              <h2 className="text-xl font-semibold text-gray-800 mb-2">{book.Title}</h2>
-              <p className="text-sm text-gray-600">
-                <strong>Authors:</strong> {book.Authors.length > 0 ? book.Authors.join(', ') : 'Unknown Author'}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Edition Number:</strong> {book.EditionNumber}
-              </p>
-              <p className="text-sm text-gray-600">
-                <strong>Available:</strong> {book.IsAvailable ? 'Yes' : 'No'}
-              </p>
-              {book.IsAvailable && (
-                <div className="mt-6">
-                  <button
-                    className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition duration-200"
-                    onClick={() => handleBorrow(book.EditionNumber)}
-                  >
-                    Borrow
-                  </button>
-                </div>
-              )}
+          {books?.length > 0 ? (
+            books.filter((book) => book.EditionNumber).map((book, index) => (
+              <div
+                key={index}
+                className="p-6 bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow"
+              >
+                <h2 className="text-xl font-semibold text-gray-800 mb-2">{book.Title}</h2>
+                <p className="text-sm text-gray-600">
+                  <strong>Authors:</strong> {book.Authors.length > 0 ? book.Authors.join(', ') : 'Unknown Author'}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Edition Number:</strong> {book.EditionNumber}
+                </p>
+                <p className="text-sm text-gray-600">
+                  <strong>Available:</strong> {book.IsAvailable ? 'Yes' : 'No'}
+                </p>
+                {book.IsAvailable && (
+                  <div className="mt-6">
+                    <button
+                      className="bg-green-600 text-white px-5 py-2 rounded-lg hover:bg-green-700 transition duration-200"
+                      onClick={() => handleBorrow(book.EditionNumber)}
+                    >
+                      Borrow
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          ) : (
+            <div className="col-span-full flex justify-center mt-8">
+              <p className="text-center text-lg text-gray-600">No books available</p>
             </div>
-          ))}
+          )}
         </div>
       )}
+
 
       <Modal
         isOpen={isModalOpen}
